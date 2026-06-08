@@ -1,0 +1,187 @@
+.cloudimage-modal {
+  padding: 0;
+}
+
+.cloudimage-dropzone {
+  border: 2px dashed var(--text-muted);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+  margin-bottom: 1rem;
+}
+
+.cloudimage-dropzone:hover,
+.cloudimage-dropzone--active {
+  border-color: var(--interactive-accent);
+  background-color: var(--background-modifier-hover);
+}
+
+.cloudimage-dropzone p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95em;
+}
+
+.cloudimage-preview {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.cloudimage-fileinfo {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  margin: 0 0 1rem 0;
+}
+
+.cloudimage-status {
+  font-size: 0.9em;
+  color: var(--text-muted);
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+  min-height: 1.2em;
+}
+
+.cloudimage-status--loading::after {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--text-muted);
+  border-top-color: var(--interactive-accent);
+  border-radius: 50%;
+  animation: cloudimage-spin 0.6s linear infinite;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+@keyframes cloudimage-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cloudimage-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.cloudimage-buttons button {
+  padding: 0.5rem 1rem;
+}
+
+.cloudimage-paste-btn {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.4rem;
+  background: var(--background-modifier-hover);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
+.cloudimage-paste-btn:hover {
+  background: var(--background-modifier-active-hover);
+  color: var(--text-normal);
+}
+
+.cloudimage-url-section {
+  margin: 1rem 0;
+}
+
+.cloudimage-separator {
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 0.85em;
+  margin: 0 0 0.5rem 0;
+}
+
+.cloudimage-url-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.cloudimage-url-input {
+  flex: 1;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.9em;
+}
+
+.cloudimage-url-input::placeholder {
+  color: var(--text-faint);
+}
+
+.cloudimage-url-btn {
+  padding: 0.4rem 1rem;
+  background: var(--interactive-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  color: var(--text-normal);
+  cursor: pointer;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.cloudimage-url-btn:hover {
+  background: var(--interactive-hover);
+}
+
+.cloudimage-history {
+  margin-top: 1rem;
+}
+
+.cloudimage-history-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.cloudimage-history-card {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--background-modifier-border);
+  background: var(--background-modifier-hover);
+}
+
+.cloudimage-history-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.cloudimage-history-thumb:hover {
+  opacity: 0.8;
+}
+
+.cloudimage-history-card--broken {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background-modifier-border);
+  cursor: default;
+}
+
+.cloudimage-history-card--broken::after {
+  content: "\1F5BC";
+  font-size: 1.4em;
+  opacity: 0.4;
+}

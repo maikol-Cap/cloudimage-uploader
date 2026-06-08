@@ -1,0 +1,9 @@
+node_modules/
+.obsidian/
+.DS_Store
+*.log
+
+# Obsidian vault — exclude personal notes and attachments
+Excalidraw/
+Sin título*.md
+Pasted image*.png

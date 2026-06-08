@@ -1,0 +1,24 @@
+{
+  "name": "obsidian-cloudimage-uploader",
+  "version": "1.0.0",
+  "description": "Upload images to ImgBB directly from your Obsidian notes",
+  "main": "main.js",
+  "scripts": {
+    "build": "node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "imgbb",
+    "image-upload"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.24.0",
+    "obsidian": "^1.7.0",
+    "typescript": "^5.4.0"
+  }
+}
