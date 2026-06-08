@@ -4,9 +4,14 @@
 
 ---
 
-## Project State — Final
+## Project State — v1.1.0
 
 **Obsidian plugin completo** — CloudImage Uploader for ImgBB. Upload, URL insert, history, settings with test connection.
+
+### New in v1.1.0
+
+- ✅ **Test Connection fix**: button now reactively enables/disables as API key is typed
+- ✅ **URL image naming**: pasted/entered URLs now show preview with editable name before inserting
 
 ### Files
 
@@ -22,9 +27,10 @@
 ### Capabilities
 
 - Upload to ImgBB (clipboard paste, drag & drop, file picker, URL)
+- URL images: preview + editable name before insert
 - History: last 50 images, deduplicated, name search, thumbnail grid
-- Test connection from settings
-- Bundle: 9.6 KB (limit 100 KB)
+- Test connection from settings (reactive disabled state)
+- Bundle: 10.1 KB (limit 100 KB)
 
 ### Gotchas & Learnings
 
@@ -32,6 +38,7 @@
 - ImgBB has no key-validation endpoint; testConnection uploads a 1x1 pixel
 - `import type` for Plugin class avoids circular dependency between main.ts ↔ settings.ts/modal.ts
 - Obsidian modals intercept keyboard events; `scope.register` needed for Escape key
+- Obsidian's Setting.addButton callback fires once at render — UI elements that react to other field changes must store component refs and update them manually
 - History deduplication by URL prevents visual clutter
 - Local history (data.json) scales fine even with 10,000+ entries
 
@@ -191,6 +198,19 @@ main.ts (Plugin Entry)
 - ✅ Authenticated with GitHub
 - ✅ Exported Engram memory to this file
 - ✅ Project ready for GitHub upload
+
+### Session 4 — v1.1 Fixes
+
+**Goal**: Fix Test Connection button + add URL image naming.
+
+**Accomplished**:
+- ✅ Test Connection button now reactively enables/disables as API key is typed
+- ✅ URL images now show preview with editable name before insert (matching file upload UX)
+- ✅ Build: 10.1 KB
+
+**Files changed**:
+- `src/settings.ts` — stored ButtonComponent ref, update setDisabled() in onChange
+- `src/modal.ts` — added selectedUrl field, handleUrl() + handleUpload() dual-mode
 
 ---
 

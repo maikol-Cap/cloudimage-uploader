@@ -1,4 +1,4 @@
-import { App, Notice, PluginSettingTab, Setting } from "obsidian";
+import { App, ButtonComponent, Notice, PluginSettingTab, Setting } from "obsidian";
 import { ImgBBClient } from "./api";
 import type CloudImagePlugin from "../main";
 
@@ -14,6 +14,8 @@ export class CloudImageSettingTab extends PluginSettingTab {
     const { containerEl } = this;
     containerEl.empty();
 
+    let testBtn: ButtonComponent;
+
     new Setting(containerEl)
       .setName("API Key")
       .setDesc("Your ImgBB API key from https://api.imgbb.com")
@@ -24,6 +26,7 @@ export class CloudImageSettingTab extends PluginSettingTab {
           .onChange(async (value) => {
             this.plugin.settings.apiKey = value.trim();
             await this.plugin.saveData(this.plugin.settings);
+            testBtn?.setDisabled(value.trim().length === 0);
           }),
       );
 
@@ -31,6 +34,7 @@ export class CloudImageSettingTab extends PluginSettingTab {
       .setName("Test Connection")
       .setDesc("Verify that your API key is valid")
       .addButton((button) => {
+        testBtn = button;
         button
           .setButtonText("Test")
           .setDisabled(this.plugin.settings.apiKey.length === 0)

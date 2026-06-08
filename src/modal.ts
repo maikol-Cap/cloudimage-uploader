@@ -7,6 +7,7 @@ import type { UploadedImage } from "./types";
 export class UploadModal extends Modal {
   plugin: CloudImagePlugin;
   selectedFile: File | null = null;
+  selectedUrl: string | null = null;
   previewUrl: string | null = null;
 
   private dropZoneEl!: HTMLElement;
@@ -89,7 +90,7 @@ export class UploadModal extends Modal {
       if (text && this.isImageUrl(text)) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        this.insertImageUrl(text);
+        this.handleUrl(text);
       }
     };
     document.addEventListener("paste", this.pasteHandler, { capture: true });
@@ -112,7 +113,7 @@ export class UploadModal extends Modal {
         new Notice("Please enter an image URL");
         return;
       }
-      this.insertImageUrl(url);
+      this.handleUrl(url);
     });
 
     // Preview section — hidden until file selected
@@ -164,6 +165,8 @@ export class UploadModal extends Modal {
     }
 
     this.selectedFile = file;
+    this.selectedUrl = null;
+    this.uploadBtn.textContent = "Upload \u2B06";
     this.uploadBtn.disabled = false;
 
     const baseName = file.name.replace(/\.[^.]+$/, "");
@@ -182,6 +185,32 @@ export class UploadModal extends Modal {
   // ── Upload flow ───────────────────────────────────────────
 
   async handleUpload() {
+    // URL insert mode — no upload needed
+    if (this.selectedUrl) {
+      const url = this.selectedUrl;
+      const customName = this.nameInputEl.value.trim();
+
+      this.saveToHistory({
+        url,
+        displayUrl: url,
+        deleteUrl: "",
+        filename: customName,
+        uploadedAt: Date.now(),
+      });
+
+      const editor = this.app.workspace.activeEditor?.editor;
+      if (editor) {
+        EditorService.insertAtCursor(editor, url, customName);
+        new Notice("Image inserted from URL");
+      } else {
+        new Notice(`Image URL: ${url}`);
+      }
+
+      this.close();
+      return;
+    }
+
+    // File upload mode
     if (!this.selectedFile) return;
 
     const file = this.selectedFile;
@@ -251,26 +280,25 @@ export class UploadModal extends Modal {
     }
   }
 
-  private insertImageUrl(url: string) {
-    const editor = this.app.workspace.activeEditor?.editor;
-    const filename = url.split("/").pop()?.split("?")[0] || "image";
+  private handleUrl(url: string) {
+    this.selectedUrl = url;
+    this.selectedFile = null;
 
-    this.saveToHistory({
-      url,
-      displayUrl: url,
-      deleteUrl: "",
-      filename,
-      uploadedAt: Date.now(),
-    });
+    const filename =
+      url.split("/").pop()?.split("?")[0]?.replace(/\.[^.]+$/, "") || "image";
+    this.nameInputEl.value = filename;
 
-    if (editor) {
-      EditorService.insertAtCursor(editor, url, filename);
-      new Notice("Image inserted from URL");
-    } else {
-      new Notice(`Image URL: ${url}`);
+    if (this.previewUrl) {
+      URL.revokeObjectURL(this.previewUrl);
+      this.previewUrl = null;
     }
 
-    this.close();
+    this.previewEl.src = url;
+    this.fileInfoEl.textContent = `URL: ${new URL(url).hostname}`;
+    this.previewSection.style.display = "block";
+
+    this.uploadBtn.textContent = "Insert \u2192";
+    this.uploadBtn.disabled = false;
   }
 
   // ── History ───────────────────────────────────────────────

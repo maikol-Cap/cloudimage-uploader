@@ -1,7 +1,7 @@
 {
   "id": "cloudimage-uploader",
   "name": "CloudImage Uploader",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "minAppVersion": "1.0.0",
   "description": "Upload images to ImgBB directly from your Obsidian notes. Supports clipboard paste, drag & drop, and file picker.",
   "author": "",
