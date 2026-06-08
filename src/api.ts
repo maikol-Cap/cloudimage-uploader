@@ -17,6 +17,7 @@ export class ImgBBClient {
   static async upload(
     file: File,
     apiKey: string,
+    customName?: string,
   ): Promise<ImgBBUploadResult> {
     if (file.size > MAX_SIZE) {
       throw new ImgBBError("File exceeds 32 MB limit", "SIZE_EXCEEDED");
@@ -26,7 +27,7 @@ export class ImgBBClient {
     formData.append("image", file);
     formData.append("key", apiKey);
 
-    const name = file.name.replace(/\.[^.]+$/, "");
+    const name = customName || file.name.replace(/\.[^.]+$/, "");
     if (name) formData.append("name", name);
 
     let response: Response;

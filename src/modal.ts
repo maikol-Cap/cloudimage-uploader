@@ -10,12 +10,14 @@ export class UploadModal extends Modal {
   previewUrl: string | null = null;
 
   private dropZoneEl!: HTMLElement;
+  private previewSection!: HTMLElement;
   private previewEl!: HTMLImageElement;
   private uploadBtn!: HTMLButtonElement;
   private cancelBtn!: HTMLButtonElement;
   private statusEl!: HTMLElement;
   private fileInfoEl!: HTMLElement;
   private urlInputEl!: HTMLInputElement;
+  private nameInputEl!: HTMLInputElement;
   private pasteHandler!: (e: ClipboardEvent) => void;
 
   constructor(app: App, plugin: CloudImagePlugin) {
@@ -28,12 +30,12 @@ export class UploadModal extends Modal {
     contentEl.empty();
     contentEl.addClass("cloudimage-modal");
 
-    contentEl.createEl("h2", { text: "Upload Image to ImgBB" });
+    contentEl.createEl("h2", { text: "CloudImage Uploader" });
 
-    // Drop zone
+    // Drop zone — unified: drop, paste, click
     this.dropZoneEl = contentEl.createDiv("cloudimage-dropzone");
     this.dropZoneEl.createEl("p", {
-      text: "Drop an image here, paste from clipboard, or click to browse",
+      text: "Drop, paste (Ctrl+V), or click to browse",
     });
 
     // Hidden file input
@@ -49,7 +51,7 @@ export class UploadModal extends Modal {
       if (file) this.handleFile(file);
     });
 
-    // Drag and drop
+    // Drag handlers
     this.dropZoneEl.addEventListener("dragover", (e) => {
       e.preventDefault();
       this.dropZoneEl.addClass("cloudimage-dropzone--active");
@@ -68,12 +70,10 @@ export class UploadModal extends Modal {
       }
     });
 
-    // Clipboard paste — capture images and image URLs
+    // Clipboard paste
     this.pasteHandler = (e: ClipboardEvent) => {
       const data = e.clipboardData;
       if (!data) return;
-
-      // Check for image file first
       for (const item of data.items) {
         if (item.type.startsWith("image/")) {
           e.preventDefault();
@@ -85,8 +85,6 @@ export class UploadModal extends Modal {
           }
         }
       }
-
-      // Check for image URL in text
       const text = data.getData("text/plain")?.trim();
       if (text && this.isImageUrl(text)) {
         e.preventDefault();
@@ -96,50 +94,19 @@ export class UploadModal extends Modal {
     };
     document.addEventListener("paste", this.pasteHandler, { capture: true });
 
-    // Paste button — fallback using Clipboard API
-    const pasteBtn = contentEl.createEl("button", {
-      text: "\u{1F4CB} Paste from clipboard",
-      cls: "cloudimage-paste-btn",
-    });
-    pasteBtn.addEventListener("click", async () => {
-      try {
-        const items = await navigator.clipboard.read();
-        for (const item of items) {
-          const imageTypes = item.types.filter((t) => t.startsWith("image/"));
-          if (imageTypes.length > 0) {
-            const blob = await item.getType(imageTypes[0]);
-            const file = new File([blob], "clipboard.png", {
-              type: imageTypes[0],
-            });
-            this.handleFile(file);
-            return;
-          }
-        }
-        new Notice("No image found in clipboard");
-      } catch {
-        new Notice(
-          "Clipboard access denied — use Ctrl+V or drag & drop instead",
-        );
-      }
-    });
-
-    // URL input section — insert image URL directly without upload
-    const urlSection = contentEl.createDiv("cloudimage-url-section");
-    urlSection.createEl("p", {
-      text: "\u2014 or paste an image URL \u2014",
-      cls: "cloudimage-separator",
-    });
-    const urlRow = urlSection.createDiv("cloudimage-url-row");
+    // URL line — compact inline row
+    const urlRow = contentEl.createDiv("cloudimage-url-row");
+    urlRow.createSpan({ text: "\u{1F517}", cls: "cloudimage-url-icon" });
     this.urlInputEl = urlRow.createEl("input", {
       type: "text",
-      placeholder: "https://example.com/image.png",
+      placeholder: "Paste image URL\u2026",
       cls: "cloudimage-url-input",
     });
-    const insertUrlBtn = urlRow.createEl("button", {
-      text: "Insert",
+    const urlBtn = urlRow.createEl("button", {
+      text: "\u2192",
       cls: "cloudimage-url-btn",
     });
-    insertUrlBtn.addEventListener("click", () => {
+    urlBtn.addEventListener("click", () => {
       const url = this.urlInputEl.value.trim();
       if (!url) {
         new Notice("Please enter an image URL");
@@ -148,42 +115,47 @@ export class UploadModal extends Modal {
       this.insertImageUrl(url);
     });
 
-    // Recent uploads history
-    this.renderHistory(contentEl);
+    // Preview section — hidden until file selected
+    this.previewSection = contentEl.createDiv("cloudimage-preview-section");
+    this.previewSection.style.display = "none";
 
-    // Preview image
-    this.previewEl = contentEl.createEl("img", {
+    this.previewEl = this.previewSection.createEl("img", {
       cls: "cloudimage-preview",
     });
-    this.previewEl.style.display = "none";
-
-    // File info
-    this.fileInfoEl = contentEl.createEl("p", {
+    this.fileInfoEl = this.previewSection.createEl("p", {
       cls: "cloudimage-fileinfo",
     });
+    this.nameInputEl = this.previewSection.createEl("input", {
+      type: "text",
+      placeholder: "Name (optional)",
+      cls: "cloudimage-name-input",
+    });
 
-    // Status text
+    // Status
     this.statusEl = contentEl.createEl("p", { cls: "cloudimage-status" });
 
     // Buttons
     const buttonRow = contentEl.createDiv("cloudimage-buttons");
-
     this.cancelBtn = buttonRow.createEl("button", { text: "Cancel" });
     this.cancelBtn.addEventListener("click", () => this.close());
-
     this.uploadBtn = buttonRow.createEl("button", {
-      text: "Upload",
+      text: "Upload \u2B06",
       cls: "mod-cta",
     });
     this.uploadBtn.disabled = true;
     this.uploadBtn.addEventListener("click", () => this.handleUpload());
 
-    // Escape key closes modal
+    // History — collapsible
+    this.renderHistory(contentEl);
+
+    // Escape
     this.scope.register([], "Escape", () => {
       this.close();
       return false;
     });
   }
+
+  // ── Image selection ──────────────────────────────────────
 
   handleFile(file: File) {
     if (!file.type.startsWith("image/")) {
@@ -194,20 +166,28 @@ export class UploadModal extends Modal {
     this.selectedFile = file;
     this.uploadBtn.disabled = false;
 
+    const baseName = file.name.replace(/\.[^.]+$/, "");
+    this.nameInputEl.value = baseName;
+
     if (this.previewUrl) URL.revokeObjectURL(this.previewUrl);
     this.previewUrl = URL.createObjectURL(file);
     this.previewEl.src = this.previewUrl;
-    this.previewEl.style.display = "block";
 
     const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
-    this.fileInfoEl.textContent = `${file.name} (${sizeMB} MB)`;
+    this.fileInfoEl.textContent = `${file.name} \u00B7 ${sizeMB} MB`;
+
+    this.previewSection.style.display = "block";
   }
+
+  // ── Upload flow ───────────────────────────────────────────
 
   async handleUpload() {
     if (!this.selectedFile) return;
 
     const file = this.selectedFile;
     const apiKey = this.plugin.settings.apiKey;
+    const customName =
+      this.nameInputEl.value.trim() || file.name.replace(/\.[^.]+$/, "");
 
     if (!apiKey) {
       new Notice("Please configure your ImgBB API key in settings");
@@ -217,19 +197,19 @@ export class UploadModal extends Modal {
     this.setLoading(true);
 
     try {
-      const result = await ImgBBClient.upload(file, apiKey);
+      const result = await ImgBBClient.upload(file, apiKey, customName);
       const editor = this.app.workspace.activeEditor?.editor;
 
       this.saveToHistory({
         url: result.url,
         displayUrl: result.displayUrl,
         deleteUrl: result.deleteUrl,
-        filename: file.name,
+        filename: customName,
         uploadedAt: Date.now(),
       });
 
       if (editor) {
-        EditorService.insertAtCursor(editor, result.url, file.name);
+        EditorService.insertAtCursor(editor, result.url, customName);
         new Notice("Image uploaded successfully");
       } else {
         new Notice(`Image uploaded: ${result.url}`);
@@ -249,6 +229,7 @@ export class UploadModal extends Modal {
   private setLoading(loading: boolean) {
     this.uploadBtn.disabled = loading;
     this.cancelBtn.disabled = loading;
+    this.dropZoneEl.style.pointerEvents = loading ? "none" : "";
     if (loading) {
       this.statusEl.textContent = "Uploading\u2026";
       this.statusEl.addClass("cloudimage-status--loading");
@@ -257,6 +238,8 @@ export class UploadModal extends Modal {
       this.statusEl.removeClass("cloudimage-status--loading");
     }
   }
+
+  // ── URL helpers ───────────────────────────────────────────
 
   private isImageUrl(text: string): boolean {
     try {
@@ -290,8 +273,9 @@ export class UploadModal extends Modal {
     this.close();
   }
 
+  // ── History ───────────────────────────────────────────────
+
   private saveToHistory(entry: UploadedImage) {
-    // Deduplicate — remove existing entry with same URL
     this.plugin.settings.uploadedImages =
       this.plugin.settings.uploadedImages.filter(
         (img) => img.url !== entry.url,
@@ -308,36 +292,80 @@ export class UploadModal extends Modal {
     if (images.length === 0) return;
 
     const section = container.createDiv("cloudimage-history");
-    section.createEl("p", {
-      text: "\u2014 Recent uploads \u2014",
-      cls: "cloudimage-separator",
+
+    // Toggle header
+    const historyToggle = section.createEl("p", {
+      text: `\u25B8 History (${images.length})`,
+      cls: "cloudimage-history-toggle",
+    });
+    const historyContent = section.createDiv("cloudimage-history-content");
+    historyContent.style.display = "none";
+
+    const searchInput = historyContent.createEl("input", {
+      type: "text",
+      placeholder: "Search by name\u2026",
+      cls: "cloudimage-history-search",
+    });
+    const historyGrid = historyContent.createDiv(
+      "cloudimage-history-grid",
+    );
+
+    const renderGrid = (query: string) => {
+      historyGrid.empty();
+      const q = query.toLowerCase().trim();
+      const filtered = q
+        ? images.filter((img) => img.filename.toLowerCase().includes(q))
+        : images;
+      const shown = filtered.length > 20 ? filtered.slice(0, 20) : filtered;
+
+      for (const img of shown) {
+        const card = historyGrid.createDiv("cloudimage-history-card");
+        const thumb = card.createEl("img", {
+          cls: "cloudimage-history-thumb",
+          attr: { src: img.url, loading: "lazy", title: img.filename },
+        });
+        thumb.addEventListener("click", () => {
+          const editor = this.app.workspace.activeEditor?.editor;
+          if (editor) {
+            EditorService.insertAtCursor(editor, img.url, img.filename);
+            new Notice("Image inserted");
+          } else {
+            new Notice(`Image URL: ${img.url}`);
+          }
+          this.close();
+        });
+        thumb.addEventListener("error", () => {
+          card.addClass("cloudimage-history-card--broken");
+          thumb.remove();
+        });
+      }
+
+      if (shown.length === 0 && q) {
+        historyGrid.createEl("p", {
+          text: `No matches for "${query}"`,
+          cls: "cloudimage-history-empty",
+        });
+      } else if (filtered.length > 20) {
+        historyGrid.createEl("p", {
+          text: `Showing 20 of ${filtered.length} \u2014 search to narrow`,
+          cls: "cloudimage-history-empty",
+        });
+      }
+    };
+
+    historyToggle.addEventListener("click", () => {
+      const open = historyContent.style.display !== "none";
+      historyContent.style.display = open ? "none" : "block";
+      historyToggle.textContent = open
+        ? `\u25B8 History (${images.length})`
+        : `\u25BE History (${images.length})`;
     });
 
-    const grid = section.createDiv("cloudimage-history-grid");
-    const recent = images.slice(0, 10);
-
-    for (const img of recent) {
-      const card = grid.createDiv("cloudimage-history-card");
-      const thumb = card.createEl("img", {
-        cls: "cloudimage-history-thumb",
-        attr: { src: img.url, loading: "lazy", title: img.filename },
-      });
-      thumb.addEventListener("click", () => {
-        const editor = this.app.workspace.activeEditor?.editor;
-        if (editor) {
-          EditorService.insertAtCursor(editor, img.url, img.filename);
-          new Notice("Image inserted");
-        } else {
-          new Notice(`Image URL: ${img.url}`);
-        }
-        this.close();
-      });
-      thumb.addEventListener("error", () => {
-        card.addClass("cloudimage-history-card--broken");
-        thumb.remove();
-      });
-    }
+    searchInput.addEventListener("input", () => renderGrid(searchInput.value));
+    renderGrid(searchInput.value);
   }
+
+  // ── Cleanup ───────────────────────────────────────────────
 
   onClose() {
     if (this.previewUrl) {

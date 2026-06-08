@@ -1,15 +1,19 @@
+/* ── Modal ─────────────────────────────────────────── */
+
 .cloudimage-modal {
   padding: 0;
 }
 
+/* ── Drop zone ─────────────────────────────────────── */
+
 .cloudimage-dropzone {
   border: 2px dashed var(--text-muted);
   border-radius: 8px;
-  padding: 2rem;
+  padding: 1.5rem;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.2s, background-color 0.2s;
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 
 .cloudimage-dropzone:hover,
@@ -24,27 +28,96 @@
   font-size: 0.95em;
 }
 
+/* ── URL row ────────────────────────────────────────── */
+
+.cloudimage-url-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+}
+
+.cloudimage-url-icon {
+  font-size: 1.1em;
+  flex-shrink: 0;
+}
+
+.cloudimage-url-input {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.85em;
+}
+
+.cloudimage-url-input::placeholder {
+  color: var(--text-faint);
+}
+
+.cloudimage-url-btn {
+  padding: 0.35rem 0.8rem;
+  background: var(--interactive-normal);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  color: var(--text-normal);
+  cursor: pointer;
+  font-size: 1em;
+  flex-shrink: 0;
+}
+
+.cloudimage-url-btn:hover {
+  background: var(--interactive-hover);
+}
+
+/* ── Preview ────────────────────────────────────────── */
+
+.cloudimage-preview-section {
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
 .cloudimage-preview {
   max-width: 100%;
-  max-height: 300px;
+  max-height: 250px;
   object-fit: contain;
   border-radius: 4px;
-  margin-bottom: 0.5rem;
   display: block;
+  margin: 0 auto 0.3rem;
 }
 
 .cloudimage-fileinfo {
-  font-size: 0.85em;
+  font-size: 0.8em;
   color: var(--text-muted);
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.4rem;
+  text-align: center;
 }
 
+.cloudimage-name-input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.85em;
+  box-sizing: border-box;
+}
+
+.cloudimage-name-input::placeholder {
+  color: var(--text-faint);
+}
+
+/* ── Status & buttons ────────────────────────────────── */
+
 .cloudimage-status {
-  font-size: 0.9em;
+  font-size: 0.85em;
   color: var(--text-muted);
   text-align: center;
-  margin: 0 0 0.5rem 0;
-  min-height: 1.2em;
+  margin: 0 0 0.4rem;
+  min-height: 1.1em;
 }
 
 .cloudimage-status--loading::after {
@@ -61,94 +134,63 @@
 }
 
 @keyframes cloudimage-spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 .cloudimage-buttons {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 0.5rem;
-  margin-top: 1rem;
 }
 
 .cloudimage-buttons button {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 1rem;
 }
 
-.cloudimage-paste-btn {
-  display: block;
-  width: 100%;
-  margin-top: 0.5rem;
-  padding: 0.4rem;
-  background: var(--background-modifier-hover);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
+/* ── History ─────────────────────────────────────────── */
+
+.cloudimage-history {
+  margin-top: 0.6rem;
+}
+
+.cloudimage-history-toggle {
+  font-size: 0.85em;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 0.9em;
+  margin: 0 0 0.3rem;
+  user-select: none;
 }
 
-.cloudimage-paste-btn:hover {
-  background: var(--background-modifier-active-hover);
+.cloudimage-history-toggle:hover {
   color: var(--text-normal);
 }
 
-.cloudimage-url-section {
-  margin: 1rem 0;
+.cloudimage-history-content {
+  border-top: 1px solid var(--background-modifier-border);
+  padding-top: 0.4rem;
 }
 
-.cloudimage-separator {
-  text-align: center;
-  color: var(--text-faint);
-  font-size: 0.85em;
-  margin: 0 0 0.5rem 0;
-}
-
-.cloudimage-url-row {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.cloudimage-url-input {
-  flex: 1;
-  padding: 0.4rem 0.6rem;
+.cloudimage-history-search {
+  width: 100%;
+  padding: 0.3rem 0.5rem;
+  margin-bottom: 0.4rem;
   border: 1px solid var(--background-modifier-border);
   border-radius: 4px;
   background: var(--background-primary);
   color: var(--text-normal);
-  font-size: 0.9em;
+  font-size: 0.82em;
+  box-sizing: border-box;
 }
 
-.cloudimage-url-input::placeholder {
+.cloudimage-history-search::placeholder {
   color: var(--text-faint);
-}
-
-.cloudimage-url-btn {
-  padding: 0.4rem 1rem;
-  background: var(--interactive-normal);
-  border: 1px solid var(--background-modifier-border);
-  border-radius: 4px;
-  color: var(--text-normal);
-  cursor: pointer;
-  font-size: 0.9em;
-  white-space: nowrap;
-}
-
-.cloudimage-url-btn:hover {
-  background: var(--interactive-hover);
-}
-
-.cloudimage-history {
-  margin-top: 1rem;
 }
 
 .cloudimage-history-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 0.4rem;
-  max-height: 200px;
+  gap: 0.35rem;
+  max-height: 180px;
   overflow-y: auto;
 }
 
@@ -182,6 +224,14 @@
 
 .cloudimage-history-card--broken::after {
   content: "\1F5BC";
-  font-size: 1.4em;
+  font-size: 1.2em;
   opacity: 0.4;
+}
+
+.cloudimage-history-empty {
+  font-size: 0.8em;
+  color: var(--text-faint);
+  text-align: center;
+  padding: 0.4rem;
+  grid-column: 1 / -1;
 }
