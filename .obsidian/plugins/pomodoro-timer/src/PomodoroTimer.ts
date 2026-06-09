@@ -8,6 +8,9 @@ export class PomodoroTimer {
   private pausedTime: number = 0;
   private totalMs: number = 0;
   private remainingMs: number = 0;
+  private tickIntervalId: number | null = null;
+  private _onTick: ((ctx: TimerContext) => void) | null = null;
+  private _onComplete: (() => void) | null = null;
 
   constructor(settings: TimerSettings) {
     this.settings = settings;
@@ -126,5 +129,47 @@ export class PomodoroTimer {
       this.totalMs = this.getModeDuration(this.mode);
       this.remainingMs = this.totalMs;
     }
+  }
+
+  // --- Tick management (owned by plugin, not view) ---
+
+  /**
+   * Start the tick interval. Returns the interval ID for plugin.registerInterval().
+   * The timer ticks independently of any view.
+   */
+  public startTick(): number {
+    this.stopTick();
+    this.tickIntervalId = window.setInterval(() => {
+      const ctx = this.tick();
+      if (this._onTick) {
+        this._onTick(ctx);
+      }
+      if (ctx.state === 'COMPLETED') {
+        this.stopTick();
+        if (this._onComplete) {
+          this._onComplete();
+        }
+      }
+    }, 1000);
+    return this.tickIntervalId;
+  }
+
+  public stopTick(): void {
+    if (this.tickIntervalId !== null) {
+      clearInterval(this.tickIntervalId);
+      this.tickIntervalId = null;
+    }
+  }
+
+  public set onTick(callback: ((ctx: TimerContext) => void) | null) {
+    this._onTick = callback;
+  }
+
+  public set onComplete(callback: (() => void) | null) {
+    this._onComplete = callback;
+  }
+
+  public get isTicking(): boolean {
+    return this.tickIntervalId !== null;
   }
 }

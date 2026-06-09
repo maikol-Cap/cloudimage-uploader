@@ -1,1 +1,432 @@
-/* Pomodoro Timer Styles - PR 1 Foundation */
+/* Pomodoro Timer — Dark Theme & Animations */
+
+/* ================================
+   CSS Custom Properties (Dark Theme)
+   ================================ */
+:root {
+  --pomo-bg: #1a1b26;
+  --pomo-surface: #24283b;
+  --pomo-text: #c0caf5;
+  --pomo-text-dim: #565f89;
+  --pomo-accent: #7aa2f7;
+  --pomo-accent-secondary: #bb9af7;
+  --pomo-success: #9ece6a;
+  --pomo-warning: #e0af68;
+  --pomo-danger: #f7768e;
+  --pomo-glow: rgba(122, 162, 247, 0.4);
+  --pomo-completion: #9ece6a;
+  --pomo-transition-speed: 0.8s;
+  --pomo-transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ================================
+   Container Layout
+   ================================ */
+.pomodoro-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(12px, 3vw, 24px);
+  min-width: 200px;
+  height: 100%;
+  background-color: var(--pomo-bg);
+  color: var(--pomo-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-y: auto;
+}
+
+/* ================================
+   Mode Selector
+   ================================ */
+.pomodoro-mode-selector {
+  display: flex;
+  gap: 4px;
+  margin-bottom: clamp(12px, 3vw, 20px);
+  padding: 4px;
+  background-color: var(--pomo-surface);
+  border-radius: 8px;
+}
+
+.pomodoro-mode-btn {
+  padding: clamp(6px, 1.5vw, 10px) clamp(10px, 2vw, 16px);
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--pomo-text-dim);
+  font-size: clamp(11px, 1.5vw, 13px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s var(--pomo-transition-ease);
+  position: relative;
+}
+
+.pomodoro-mode-btn:hover {
+  color: var(--pomo-text);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.pomodoro-mode-btn.active {
+  color: var(--pomo-accent);
+  background-color: rgba(122, 162, 247, 0.15);
+}
+
+.pomodoro-mode-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background-color: var(--pomo-accent);
+  border-radius: 1px;
+  animation: underline-in 0.2s var(--pomo-transition-ease);
+}
+
+@keyframes underline-in {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* ================================
+   SVG Timer Circle
+   ================================ */
+.pomodoro-svg-container {
+  position: relative;
+  width: clamp(160px, 50vw, 220px);
+  height: clamp(160px, 50vw, 220px);
+  margin-bottom: clamp(12px, 3vw, 20px);
+}
+
+.pomodoro-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+/* Background ring */
+.bg-ring {
+  fill: none;
+  stroke: var(--pomo-surface);
+  stroke-width: 8;
+}
+
+/* Progress ring */
+.progress-ring {
+  fill: none;
+  stroke: url(#timerGradient);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s var(--pomo-transition-ease);
+}
+
+/* Glow ring */
+.glow-ring {
+  fill: none;
+  stroke: var(--pomo-accent);
+  stroke-width: 8;
+  stroke-linecap: round;
+  opacity: 0;
+  filter: url(#glow);
+  transition: opacity 0.3s var(--pomo-transition-ease),
+              stroke-dashoffset 0.8s var(--pomo-transition-ease);
+}
+
+.glow-ring.pomodoro-glow-active {
+  opacity: 0.6;
+  animation: glow-pulse 0.3s var(--pomo-transition-ease);
+}
+
+@keyframes glow-pulse {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* ================================
+   Time Display
+   ================================ */
+.pomodoro-time {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(28px, 8vw, 40px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--pomo-text);
+  letter-spacing: 1px;
+  user-select: none;
+}
+
+/* ================================
+   Mode Label
+   ================================ */
+.pomodoro-mode-label {
+  font-size: clamp(13px, 2vw, 16px);
+  font-weight: 500;
+  color: var(--pomo-accent);
+  margin-bottom: clamp(16px, 4vw, 28px);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  opacity: 1;
+  transition: opacity 0.2s var(--pomo-transition-ease);
+}
+
+/* ================================
+   Control Buttons
+   ================================ */
+.pomodoro-controls {
+  display: flex;
+  gap: clamp(8px, 2vw, 12px);
+  align-items: center;
+}
+
+.pomodoro-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: clamp(40px, 10vw, 52px);
+  height: clamp(40px, 10vw, 52px);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s var(--pomo-transition-ease);
+  position: relative;
+  overflow: hidden;
+}
+
+.pomodoro-btn.hidden {
+  display: none;
+}
+
+.pomodoro-btn svg {
+  width: clamp(18px, 4vw, 24px);
+  height: clamp(18px, 4vw, 24px);
+  position: relative;
+  z-index: 1;
+}
+
+/* Play button */
+.pomodoro-btn-play {
+  background-color: var(--pomo-accent);
+  color: var(--pomo-bg);
+  box-shadow: 0 2px 8px rgba(122, 162, 247, 0.3);
+}
+
+.pomodoro-btn-play:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(122, 162, 247, 0.4);
+}
+
+.pomodoro-btn-play:active {
+  transform: scale(0.95);
+}
+
+/* Pause button */
+.pomodoro-btn-pause {
+  background-color: var(--pomo-warning);
+  color: var(--pomo-bg);
+  box-shadow: 0 2px 8px rgba(224, 175, 104, 0.3);
+}
+
+.pomodoro-btn-pause:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(224, 175, 104, 0.4);
+}
+
+.pomodoro-btn-pause:active {
+  transform: scale(0.95);
+}
+
+/* Reset button */
+.pomodoro-btn-reset {
+  background-color: var(--pomo-surface);
+  color: var(--pomo-text-dim);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pomodoro-btn-reset:hover {
+  transform: scale(1.08);
+  color: var(--pomo-danger);
+  border-color: var(--pomo-danger);
+  opacity: 0.9;
+}
+
+.pomodoro-btn-reset:active {
+  transform: scale(0.95);
+}
+
+/* ================================
+   Ripple Effect (Play Button Only)
+   ================================ */
+.ripple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4);
+  transform: scale(0);
+  animation: ripple-expand 0.6s ease-out;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes ripple-expand {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* ================================
+   Play Animation Keyframes
+   ================================ */
+.pomodoro-animate-play {
+  animation: pulse-play 0.3s var(--pomo-transition-ease);
+}
+
+@keyframes pulse-play {
+  0% {
+    transform: scale(0.95);
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px var(--pomo-glow));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px var(--pomo-glow));
+  }
+}
+
+/* ================================
+   Time Pulse Animation
+   ================================ */
+.pomodoro-animate-time-pulse {
+  animation: time-pulse 0.2s var(--pomo-transition-ease);
+}
+
+@keyframes time-pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* ================================
+   Completion Animation Keyframes
+   ================================ */
+.pomodoro-animate-completion {
+  animation: completion-pulse 1s var(--pomo-transition-ease);
+}
+
+@keyframes completion-pulse {
+  0% {
+    filter: drop-shadow(0 0 4px var(--pomo-completion));
+    opacity: 1;
+  }
+  25% {
+    filter: drop-shadow(0 0 16px var(--pomo-completion));
+    opacity: 0.9;
+  }
+  50% {
+    filter: drop-shadow(0 0 4px var(--pomo-completion));
+    opacity: 1;
+  }
+  75% {
+    filter: drop-shadow(0 0 16px var(--pomo-completion));
+    opacity: 0.9;
+  }
+  100% {
+    filter: drop-shadow(0 0 4px var(--pomo-completion));
+    opacity: 1;
+  }
+}
+
+/* Breathing effect (infinite loop after completion) */
+.pomodoro-animate-breathing {
+  animation: breathing 2s ease-in-out infinite;
+}
+
+@keyframes breathing {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px var(--pomo-completion));
+    opacity: 1;
+  }
+  50% {
+    filter: drop-shadow(0 0 12px var(--pomo-completion));
+    opacity: 0.85;
+  }
+}
+
+/* Completed time display */
+.pomodoro-time-completed {
+  color: var(--pomo-completion) !important;
+  transition: color 0.3s var(--pomo-transition-ease);
+}
+
+/* ================================
+   Mode Switch Cross-Fade
+   ================================ */
+.pomodoro-mode-label {
+  transition: opacity 0.2s var(--pomo-transition-ease);
+}
+
+/* ================================
+   Settings Input
+   ================================ */
+.pomodoro-duration-input {
+  width: 80px;
+  padding: 6px 10px;
+  border: 1px solid var(--pomo-surface);
+  border-radius: 6px;
+  background-color: var(--pomo-bg);
+  color: var(--pomo-text);
+  font-size: 14px;
+  text-align: center;
+}
+
+.pomodoro-duration-input:focus {
+  outline: none;
+  border-color: var(--pomo-accent);
+  box-shadow: 0 0 0 2px rgba(122, 162, 247, 0.2);
+}
+
+/* ================================
+   Responsive Adjustments
+   ================================ */
+@media (max-width: 280px) {
+  .pomodoro-mode-selector {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .pomodoro-mode-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
