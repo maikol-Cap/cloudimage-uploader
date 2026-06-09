@@ -1,18 +1,18 @@
 schema: spec-driven
 
 context: |
-  Project: newproyect — Obsidian plugin
-  Language: TypeScript 5.x
+  Project: cloudimage-uploader — Obsidian plugin for ImgBB image upload
+  Language: TypeScript 5.4
   Runtime: Node.js 18+
-  Bundler: esbuild
-  Platform: Obsidian plugin SDK
-  Architecture: TBD (greenfield)
+  Bundler: esbuild 0.24
+  Platform: Obsidian plugin SDK 1.7
+  Architecture: Modal/Service pattern (UploadModal → ImgBBClient + EditorService)
   Testing: none detected — no test runner configured
-  Version control: not initialized
+  Version control: git (4 commits, main branch)
 
 strict_tdd: false
 test_command: ""
-build_command: ""
+build_command: "npm run build"
 
 testing:
   runner: null
@@ -24,8 +24,8 @@ testing:
   coverage_command: ""
   linter: false
   linter_command: ""
-  type_checker: false
-  type_checker_command: ""
+  type_checker: true
+  type_checker_command: "tsc --noEmit"
   formatter: false
   formatter_command: ""
 
@@ -47,7 +47,7 @@ rules:
     test_command: ""
   verify:
     test_command: ""
-    build_command: ""
+    build_command: "npm run build"
     coverage_threshold: 0
   archive:
     - Warn before merging destructive deltas

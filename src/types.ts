@@ -21,3 +21,12 @@ export interface ImgBBUploadResult {
   displayUrl: string;
   deleteUrl: string;
 }
+
+export type SizePreset = 'none' | 'small' | 'medium' | 'full' | 'custom';
+export const SIZE_PRESET_VALUES: Record<SizePreset, number | null> = {
+  none: null,
+  small: 400,
+  medium: 600,
+  full: 800,
+  custom: null,
+};

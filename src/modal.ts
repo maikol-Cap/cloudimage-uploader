@@ -2,13 +2,14 @@ import { App, Modal, Notice } from "obsidian";
 import { ImgBBClient, ImgBBError } from "./api";
 import { EditorService } from "./editor";
 import type CloudImagePlugin from "../main";
-import type { UploadedImage } from "./types";
+import { type UploadedImage, SizePreset, SIZE_PRESET_VALUES } from "./types";
 
 export class UploadModal extends Modal {
   plugin: CloudImagePlugin;
   selectedFile: File | null = null;
   selectedUrl: string | null = null;
   previewUrl: string | null = null;
+  selectedSize: SizePreset = 'none';
 
   private dropZoneEl!: HTMLElement;
   private previewSection!: HTMLElement;
@@ -20,6 +21,9 @@ export class UploadModal extends Modal {
   private urlInputEl!: HTMLInputElement;
   private nameInputEl!: HTMLInputElement;
   private pasteHandler!: (e: ClipboardEvent) => void;
+  private sizeSelectEl!: HTMLSelectElement;
+  private customRowEl!: HTMLElement;
+  private customInputEl!: HTMLInputElement;
 
   constructor(app: App, plugin: CloudImagePlugin) {
     super(app);
@@ -31,7 +35,43 @@ export class UploadModal extends Modal {
     contentEl.empty();
     contentEl.addClass("cloudimage-modal");
 
-    contentEl.createEl("h2", { text: "CloudImage Uploader" });
+    contentEl.createDiv({ text: "Image upload", cls: "cloudimage-modal-title" });
+
+    // Size toolbar
+    const toolbarEl = contentEl.createDiv("cloudimage-toolbar");
+
+    this.sizeSelectEl = toolbarEl.createEl("select", {
+      cls: "cloudimage-size-select",
+    });
+    const sizeOptions: { preset: SizePreset; label: string }[] = [
+      { preset: 'none', label: 'Original' },
+      { preset: 'small', label: 'Small (400px)' },
+      { preset: 'medium', label: 'Medium (600px)' },
+      { preset: 'full', label: 'Full (800px)' },
+      { preset: 'custom', label: 'Custom\u2026' },
+    ];
+    sizeOptions.forEach(({ preset, label }) => {
+      const opt = this.sizeSelectEl.createEl("option", { text: label });
+      opt.value = preset;
+      if (preset === this.selectedSize) opt.selected = true;
+    });
+    this.sizeSelectEl.addEventListener("change", () => {
+      this.selectedSize = this.sizeSelectEl.value as SizePreset;
+      this.customRowEl.style.display = this.selectedSize === 'custom' ? 'flex' : 'none';
+      if (this.selectedSize !== 'custom') {
+        this.customInputEl.value = '';
+      }
+    });
+
+    // Custom size row
+    this.customRowEl = contentEl.createDiv("cloudimage-custom-row");
+    this.customRowEl.style.display = 'none';
+    this.customRowEl.createSpan({ text: "Width (px):" });
+    this.customInputEl = this.customRowEl.createEl("input", {
+      type: "number",
+      cls: "cloudimage-custom-input",
+      attr: { min: "50", max: "2000", placeholder: "50\u20132000" },
+    });
 
     // Drop zone — unified: drop, paste, click
     this.dropZoneEl = contentEl.createDiv("cloudimage-dropzone");
@@ -185,6 +225,22 @@ export class UploadModal extends Modal {
   // ── Upload flow ───────────────────────────────────────────
 
   async handleUpload() {
+    // Custom size validation
+    if (this.selectedSize === 'custom') {
+      const raw = this.customInputEl.value.trim();
+      if (!raw) {
+        new Notice("Please enter a custom width (50\u20132000)");
+        return;
+      }
+      const parsed = parseInt(raw, 10);
+      if (isNaN(parsed) || parsed < 50 || parsed > 2000) {
+        new Notice("Custom width must be a number between 50 and 2000");
+        return;
+      }
+    }
+
+    const effectiveSize = this.getEffectiveSize();
+
     // URL insert mode — no upload needed
     if (this.selectedUrl) {
       const url = this.selectedUrl;
@@ -200,7 +256,7 @@ export class UploadModal extends Modal {
 
       const editor = this.app.workspace.activeEditor?.editor;
       if (editor) {
-        EditorService.insertAtCursor(editor, url, customName);
+        EditorService.insertAtCursor(editor, url, customName, effectiveSize ?? undefined);
         new Notice("Image inserted from URL");
       } else {
         new Notice(`Image URL: ${url}`);
@@ -238,7 +294,7 @@ export class UploadModal extends Modal {
       });
 
       if (editor) {
-        EditorService.insertAtCursor(editor, result.url, customName);
+        EditorService.insertAtCursor(editor, result.url, customName, effectiveSize ?? undefined);
         new Notice("Image uploaded successfully");
       } else {
         new Notice(`Image uploaded: ${result.url}`);
@@ -301,6 +357,16 @@ export class UploadModal extends Modal {
     this.uploadBtn.disabled = false;
   }
 
+  // ── Size toolbar helpers ───────────────────────────────────
+
+  private getEffectiveSize(): number | null {
+    if (this.selectedSize === 'custom') {
+      const val = parseInt(this.customInputEl.value, 10);
+      return isNaN(val) ? null : val;
+    }
+    return SIZE_PRESET_VALUES[this.selectedSize];
+  }
+
   // ── History ───────────────────────────────────────────────
 
   private saveToHistory(entry: UploadedImage) {
@@ -355,7 +421,8 @@ export class UploadModal extends Modal {
         thumb.addEventListener("click", () => {
           const editor = this.app.workspace.activeEditor?.editor;
           if (editor) {
-            EditorService.insertAtCursor(editor, img.url, img.filename);
+            const size = this.getEffectiveSize() ?? undefined;
+            EditorService.insertAtCursor(editor, img.url, img.filename, size);
             new Notice("Image inserted");
           } else {
             new Notice(`Image URL: ${img.url}`);
