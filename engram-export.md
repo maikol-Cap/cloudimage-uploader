@@ -4,9 +4,16 @@
 
 ---
 
-## Project State — v1.1.0
+## Project State — v1.2.0
 
-**Obsidian plugin completo** — CloudImage Uploader for ImgBB. Upload, URL insert, history, settings with test connection.
+**Obsidian plugin completo** — CloudImage Uploader for ImgBB. Upload, URL insert, history, settings with test connection, and image size selector.
+
+### New in v1.2.0
+
+- ✅ **Image size selector**: dropdown toolbar in UploadModal — Original, Small (400px), Medium (600px), Full (800px), Custom (50–2000px)
+- ✅ **Obsidian pipe syntax**: `![alt|400](url)` when size selected, `![alt](url)` by default
+- ✅ **Size applies everywhere**: file upload, URL insert, and history thumbnail clicks
+- ✅ **Custom size validation**: rejects empty, non-numeric, and out-of-range values before upload/insert
 
 ### New in v1.1.0
 
@@ -16,21 +23,24 @@
 ### Files
 
 - `main.ts` — Plugin entry, Ctrl+Shift+U command, settings tab
-- `src/modal.ts` — UploadModal (drag/drop, paste, file picker, URL input, history grid)
+- `src/modal.ts` — UploadModal (drag/drop, paste, file picker, URL input, history grid, size toolbar)
 - `src/api.ts` — ImgBBClient (upload, testConnection, 32MB validation, typed errors)
-- `src/editor.ts` — EditorService.insertAtCursor()
+- `src/editor.ts` — EditorService.insertAtCursor(url, filename, size?) with optional Obsidian pipe syntax
 - `src/settings.ts` — CloudImageSettingTab (API key input, Test Connection button)
-- `src/types.ts` — CloudImagePluginSettings, UploadedImage, ImgBBUploadResult
+- `src/types.ts` — CloudImagePluginSettings, UploadedImage, ImgBBUploadResult, SizePreset, SIZE_PRESET_VALUES
 - `styles.css` — Obsidian CSS variables, drop zone, spinner, history grid
 - `manifest.json`, `package.json`, `tsconfig.json`, `esbuild.config.mjs`
 
 ### Capabilities
 
 - Upload to ImgBB (clipboard paste, drag & drop, file picker, URL)
+- Image size selector: Original, Small (400px), Medium (600px), Full (800px), Custom (50–2000px)
+- Size applies to upload, URL insert, and history thumbnails
+- Obsidian pipe syntax: `![alt|400](url)`
 - URL images: preview + editable name before insert
 - History: last 50 images, deduplicated, name search, thumbnail grid
 - Test connection from settings (reactive disabled state)
-- Bundle: 10.1 KB (limit 100 KB)
+- Bundle: 11.7 KB (limit 100 KB)
 
 ### Gotchas & Learnings
 
@@ -212,6 +222,29 @@ main.ts (Plugin Entry)
 - `src/settings.ts` — stored ButtonComponent ref, update setDisabled() in onChange
 - `src/modal.ts` — added selectedUrl field, handleUrl() + handleUpload() dual-mode
 
+### Session 5 — v1.2 Image Size Selector
+
+**Goal**: Add image size selector to UploadModal using SDD workflow.
+
+**Accomplished**:
+- ✅ SDD full cycle: proposal → specs → design → tasks → apply → verify
+- ✅ SizePreset type + SIZE_PRESET_VALUES map (src/types.ts)
+- ✅ EditorService.insertAtCursor with optional size param (src/editor.ts)
+- ✅ Dropdown toolbar with 5 options in UploadModal (src/modal.ts)
+- ✅ Custom size input with validation (50–2000px)
+- ✅ Size applies to file upload, URL insert, and history thumbnails
+- ✅ Modal title changed from h2 to muted div "Image upload"
+- ✅ Code cleanup: removed unused customSizeValue and toolbarEl fields
+- ✅ Build: 11.7 KB
+- ✅ Pushed to GitHub (main branch)
+
+**Files changed**:
+- `src/types.ts` — +9 lines (SizePreset, SIZE_PRESET_VALUES)
+- `src/editor.ts` — +2/-2 lines (optional size parameter)
+- `src/modal.ts` — +83/-7 lines (toolbar, dropdown, validation, history fix)
+- `styles.css` — +55/-15 lines (select styling)
+- `openspec/` — SDD artifacts (proposal, specs, design, tasks)
+
 ---
 
 ## Key Learnings
@@ -226,4 +259,4 @@ main.ts (Plugin Entry)
 
 ---
 
-*Exported from Engram — newproyect project — 2026-06-08*
+*Exported from Engram — cloudimage-uploader project — 2026-06-09*
