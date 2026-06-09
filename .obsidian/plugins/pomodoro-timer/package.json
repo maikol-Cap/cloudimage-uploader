@@ -1,0 +1,25 @@
+{
+  "name": "obsidian-pomodoro-timer",
+  "version": "1.0.0",
+  "description": "A beautiful circular gradient countdown timer for Obsidian's right sidebar with Android-app visual quality.",
+  "main": "main.js",
+  "scripts": {
+    "build": "node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "pomodoro",
+    "timer",
+    "focus"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.24.0",
+    "obsidian": "^1.7.0",
+    "typescript": "^5.4.0"
+  }
+}
