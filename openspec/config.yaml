@@ -8,7 +8,7 @@ context: |
   Platform: Obsidian plugin SDK 1.7
   Architecture: Modal/Service pattern (UploadModal → ImgBBClient + EditorService)
   Testing: none detected — no test runner configured
-  Version control: git (4 commits, main branch)
+  Version control: git (main branch)
 
 strict_tdd: false
 test_command: ""
