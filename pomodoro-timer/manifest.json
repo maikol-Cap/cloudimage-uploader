@@ -1,0 +1,10 @@
+{
+  "id": "pomodoro-timer",
+  "name": "Pomodoro Timer",
+  "version": "1.0.0",
+  "minAppVersion": "1.0.0",
+  "description": "A Pomodoro timer with terminal/CLI aesthetic for focused work sessions",
+  "author": "",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}

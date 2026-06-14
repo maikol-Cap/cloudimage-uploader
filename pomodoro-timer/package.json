@@ -1,0 +1,26 @@
+{
+  "name": "obsidian-pomodoro-timer",
+  "version": "1.0.0",
+  "description": "A Pomodoro timer with terminal/CLI aesthetic for Obsidian",
+  "main": "main.js",
+  "scripts": {
+    "build": "node esbuild.config.mjs production",
+    "dev": "node esbuild.config.mjs"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "pomodoro",
+    "timer",
+    "productivity"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "esbuild": "^0.24.0",
+    "obsidian": "^1.7.0",
+    "tslib": "^2.6.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,111 @@
+/* ── Terminal container ──────────────────────────── */
+
+.pomodoro-terminal {
+  font-family: var(--font-monospace);
+  background: var(--background-primary);
+  color: var(--text-normal);
+  padding: 8px;
+  user-select: none;
+}
+
+/* ── CRT glow ───────────────────────────────────── */
+
+.pomodoro-terminal.crt-glow .pomodoro-minutes,
+.pomodoro-terminal.crt-glow .pomodoro-seconds {
+  text-shadow: 0 0 8px var(--text-accent);
+}
+
+/* ── Borders ────────────────────────────────────── */
+
+.pomodoro-border {
+  color: var(--text-muted);
+  font-size: 0.85em;
+  white-space: pre;
+  line-height: 1.2;
+}
+
+/* ── Body ───────────────────────────────────────── */
+
+.pomodoro-body {
+  padding: 8px 4px;
+}
+
+/* ── Clock (minutes + seconds stacked) ──────────── */
+
+.pomodoro-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.pomodoro-minutes {
+  font-size: 3.5em;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  color: #5af78e;
+  transition: filter 1.5s ease-in-out;
+}
+
+.pomodoro-seconds {
+  font-size: 3.5em;
+  font-weight: 300;
+  line-height: 1;
+  text-align: center;
+  color: #5af78e;
+  opacity: 0.75;
+  transition: filter 1.5s ease-in-out;
+  margin-top: -2px;
+}
+
+/* ── Progress bar ───────────────────────────────── */
+
+.pomodoro-progress {
+  text-align: center;
+  font-size: 0.9em;
+  color: #5af78e;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+  transition: filter 1.5s ease-in-out;
+}
+
+/* ── Status line ────────────────────────────────── */
+
+.pomodoro-status {
+  text-align: center;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+/* ── Controls ───────────────────────────────────── */
+
+.pomodoro-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pomodoro-btn {
+  font-family: var(--font-monospace);
+  background: var(--interactive-normal);
+  color: var(--text-accent);
+  border: 1px solid var(--background-modifier-border);
+  padding: 6px 12px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9em;
+  border-radius: 2px;
+}
+
+.pomodoro-btn:hover {
+  background: var(--interactive-hover);
+  color: var(--interactive-accent);
+}
+
+.pomodoro-btn:active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
