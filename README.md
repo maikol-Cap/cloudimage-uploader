@@ -45,5 +45,7 @@ cp main.js manifest.json styles.css /path/to/vault/.obsidian/plugins/cloudimage-
 ```
 
 ## License
+```js
+console.log("hola mundo")
+```
 
-MIT

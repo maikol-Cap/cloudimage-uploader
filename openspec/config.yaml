@@ -2,11 +2,12 @@ schema: spec-driven
 
 context: |
   Project: cloudimage-uploader — Obsidian plugin for ImgBB image upload
+  Subproject: pomodoro-timer — Obsidian plugin for Pomodoro timer with terminal/CLI aesthetic
   Language: TypeScript 5.4
   Runtime: Node.js 18+
   Bundler: esbuild 0.24
   Platform: Obsidian plugin SDK 1.7
-  Architecture: Modal/Service pattern (UploadModal → ImgBBClient + EditorService)
+  Architecture: Modal/Service pattern (UploadModal → ImgBBClient + EditorService); TimerEngine-ItemView pattern (TimerEngine owned by Plugin, PomodoroView subscribes)
   Testing: none detected — no test runner configured
   Version control: git (main branch)
 
