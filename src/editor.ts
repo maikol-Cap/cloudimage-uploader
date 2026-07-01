@@ -13,4 +13,12 @@ export class EditorService {
     const newPos = { line: cursor.line, ch: cursor.ch + markdown.length };
     editor.setCursor(newPos);
   }
+
+  /** Insert only the raw URL — no markdown wrapping. Useful for Excalidraw and other non-markdown contexts. */
+  static insertRawUrl(editor: Editor, url: string): void {
+    const cursor = editor.getCursor();
+    editor.replaceRange(url, cursor);
+    const newPos = { line: cursor.line, ch: cursor.ch + url.length };
+    editor.setCursor(newPos);
+  }
 }

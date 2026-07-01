@@ -15,6 +15,7 @@ export class UploadModal extends Modal {
   private previewSection!: HTMLElement;
   private previewEl!: HTMLImageElement;
   private uploadBtn!: HTMLButtonElement;
+  private urlBtn!: HTMLButtonElement;
   private cancelBtn!: HTMLButtonElement;
   private statusEl!: HTMLElement;
   private fileInfoEl!: HTMLElement;
@@ -179,7 +180,17 @@ export class UploadModal extends Modal {
     const buttonRow = contentEl.createDiv("cloudimage-buttons");
     this.cancelBtn = buttonRow.createEl("button", { text: "Cancel" });
     this.cancelBtn.addEventListener("click", () => this.close());
-    this.uploadBtn = buttonRow.createEl("button", {
+
+    const actionGroup = buttonRow.createDiv("cloudimage-action-group");
+
+    this.urlBtn = actionGroup.createEl("button", {
+      text: "\u{1F517} URL",
+      title: "Insert URL only (no markdown) \u2014 for Excalidraw",
+    });
+    this.urlBtn.disabled = true;
+    this.urlBtn.addEventListener("click", () => this.handleInsertUrl());
+
+    this.uploadBtn = actionGroup.createEl("button", {
       text: "Upload \u2B06",
       cls: "mod-cta",
     });
@@ -208,6 +219,7 @@ export class UploadModal extends Modal {
     this.selectedUrl = null;
     this.uploadBtn.textContent = "Upload \u2B06";
     this.uploadBtn.disabled = false;
+    this.urlBtn.disabled = false;
 
     const baseName = file.name.replace(/\.[^.]+$/, "");
     this.nameInputEl.value = baseName;
@@ -311,8 +323,71 @@ export class UploadModal extends Modal {
     }
   }
 
+  // ── URL-only insert (no markdown wrapping) ────────────────
+
+  async handleInsertUrl() {
+    // URL mode — insert directly
+    if (this.selectedUrl) {
+      await this.insertOrCopyUrl(this.selectedUrl);
+      this.close();
+      return;
+    }
+
+    // File mode — upload to ImgBB first, then insert raw URL
+    if (!this.selectedFile) return;
+
+    const file = this.selectedFile;
+    const apiKey = this.plugin.settings.apiKey;
+    const customName =
+      this.nameInputEl.value.trim() || file.name.replace(/\.[^.]+$/, "");
+
+    if (!apiKey) {
+      new Notice("Please configure your ImgBB API key in settings");
+      return;
+    }
+
+    this.setLoading(true);
+
+    try {
+      const result = await ImgBBClient.upload(file, apiKey, customName);
+
+      this.saveToHistory({
+        url: result.url,
+        displayUrl: result.displayUrl,
+        deleteUrl: result.deleteUrl,
+        filename: customName,
+        uploadedAt: Date.now(),
+      });
+
+      await this.insertOrCopyUrl(result.url);
+      this.close();
+    } catch (error) {
+      if (error instanceof ImgBBError) {
+        new Notice(error.message);
+      } else {
+        new Notice("Upload failed: unexpected error");
+      }
+      this.setLoading(false);
+    }
+  }
+
+  /** Insert URL at cursor, or copy to clipboard when no text editor is active (e.g. Excalidraw canvas). */
+  private async insertOrCopyUrl(url: string): Promise<void> {
+    const editor = this.app.workspace.activeEditor?.editor;
+    if (editor) {
+      EditorService.insertRawUrl(editor, url);
+      new Notice("URL inserted");
+    } else {
+      await navigator.clipboard.writeText(url);
+      new Notice("URL copied to clipboard \u2014 paste it in the canvas");
+    }
+  }
+
+  // ── Loading state ─────────────────────────────────────────
+
   private setLoading(loading: boolean) {
     this.uploadBtn.disabled = loading;
+    this.urlBtn.disabled = loading;
     this.cancelBtn.disabled = loading;
     this.dropZoneEl.style.pointerEvents = loading ? "none" : "";
     if (loading) {
@@ -355,6 +430,7 @@ export class UploadModal extends Modal {
 
     this.uploadBtn.textContent = "Insert \u2192";
     this.uploadBtn.disabled = false;
+    this.urlBtn.disabled = false;
   }
 
   // ── Size toolbar helpers ───────────────────────────────────
@@ -432,6 +508,18 @@ export class UploadModal extends Modal {
         thumb.addEventListener("error", () => {
           card.addClass("cloudimage-history-card--broken");
           thumb.remove();
+        });
+
+        // URL-only insert button overlay
+        const urlBtn = card.createEl("button", {
+          cls: "cloudimage-history-urlbtn",
+          attr: { title: "Insert URL only (no markdown)" },
+          text: "\u{1F517}",
+        });
+        urlBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          await this.insertOrCopyUrl(img.url);
+          this.close();
         });
       }
 

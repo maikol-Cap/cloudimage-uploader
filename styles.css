@@ -147,6 +147,11 @@
   padding: 0.4rem 1rem;
 }
 
+.cloudimage-action-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
 /* ── History ─────────────────────────────────────────── */
 
 .cloudimage-history {
@@ -195,6 +200,7 @@
 }
 
 .cloudimage-history-card {
+  position: relative;
   aspect-ratio: 1;
   border-radius: 4px;
   overflow: hidden;
@@ -220,6 +226,35 @@
   justify-content: center;
   background: var(--background-modifier-border);
   cursor: default;
+}
+
+.cloudimage-history-urlbtn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  font-size: 0.7em;
+  line-height: 1;
+  border: none;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cloudimage-history-card:hover .cloudimage-history-urlbtn {
+  opacity: 1;
+}
+
+.cloudimage-history-urlbtn:hover {
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .cloudimage-history-card--broken::after {
