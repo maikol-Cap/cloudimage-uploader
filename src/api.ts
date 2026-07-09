@@ -1,7 +1,7 @@
 import type { ImgBBUploadResult } from "./types";
+import { MAX_FILE_SIZE } from "./types";
 
 const API_URL = "https://api.imgbb.com/1/upload";
-const MAX_SIZE = 32 * 1024 * 1024; // 32 MB
 
 export class ImgBBError extends Error {
   code: string;
@@ -17,9 +17,9 @@ export class ImgBBClient {
   static async upload(
     file: File,
     apiKey: string,
-    customName?: string,
+    name?: string,
   ): Promise<ImgBBUploadResult> {
-    if (file.size > MAX_SIZE) {
+    if (file.size > MAX_FILE_SIZE) {
       throw new ImgBBError("File exceeds 32 MB limit", "SIZE_EXCEEDED");
     }
 
@@ -27,8 +27,8 @@ export class ImgBBClient {
     formData.append("image", file);
     formData.append("key", apiKey);
 
-    const name = customName || file.name.replace(/\.[^.]+$/, "");
-    if (name) formData.append("name", name);
+    const imageName = name || file.name.replace(/\.[^.]+$/, "");
+    if (imageName) formData.append("name", imageName);
 
     let response: Response;
     try {

@@ -1,6 +1,6 @@
 {
   "name": "obsidian-cloudimage-uploader",
-  "version": "1.0.0",
+  "version": "1.4.0",
   "description": "Upload images to ImgBB directly from your Obsidian notes",
   "main": "main.js",
   "scripts": {

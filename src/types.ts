@@ -22,11 +22,14 @@ export interface ImgBBUploadResult {
   deleteUrl: string;
 }
 
-export type SizePreset = 'none' | 'small' | 'medium' | 'full' | 'custom';
-export const SIZE_PRESET_VALUES: Record<SizePreset, number | null> = {
+export const SIZE_PRESETS: Record<string, number | null> = {
   none: null,
   small: 400,
   medium: 600,
   full: 800,
   custom: null,
 };
+
+export const MAX_FILE_SIZE = 32 * 1024 * 1024; // 32 MB
+export const MAX_HISTORY = 50;
+export const MAX_HISTORY_DISPLAY = 20;
