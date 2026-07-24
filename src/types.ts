@@ -1,26 +1,51 @@
+export interface Account {
+  id: string;
+  name: string;
+  provider: "imgbb" | "r2" | "b2";
+
+  // ImgBB
+  imgbbApiKey?: string;
+
+  // R2
+  r2AccountId?: string;
+  r2AccessKeyId?: string;
+  r2SecretAccessKey?: string;
+  r2Bucket?: string;
+  r2CustomDomain?: string;
+
+  // B2
+  b2ApplicationKeyId?: string;
+  b2ApplicationKey?: string;
+  b2BucketId?: string;
+  b2BucketName?: string;
+
+  // Image compression
+  compressionEnabled?: boolean;
+  compressionMaxWidth?: number;
+  compressionFormat?: "webp" | "original";
+  compressionQuality?: number;
+  compressionSkipThresholdKB?: number;
+}
+
 export interface UploadedImage {
   url: string;
   displayUrl: string;
-  deleteUrl: string;
+  deleteUrl?: string;
   filename: string;
   uploadedAt: number;
 }
 
 export interface CloudImagePluginSettings {
-  apiKey: string;
+  accounts: Account[];
+  lastUsedAccountId: string | null;
   uploadedImages: UploadedImage[];
 }
 
 export const DEFAULT_SETTINGS: CloudImagePluginSettings = {
-  apiKey: "",
+  accounts: [],
+  lastUsedAccountId: null,
   uploadedImages: [],
 };
-
-export interface ImgBBUploadResult {
-  url: string;
-  displayUrl: string;
-  deleteUrl: string;
-}
 
 export const SIZE_PRESETS: Record<string, number | null> = {
   none: null,

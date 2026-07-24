@@ -281,6 +281,38 @@
   margin-bottom: 0.6rem;
 }
 
+/* ── Account selector ──────────────────────────────── */
+
+.cloudimage-account-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.8em;
+  color: var(--text-muted);
+}
+
+.cloudimage-account-row span {
+  flex-shrink: 0;
+}
+
+.cloudimage-account-select {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--interactive-normal);
+  color: var(--text-normal);
+  font-size: 0.85em;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.cloudimage-account-select:focus {
+  border-color: var(--interactive-accent);
+  outline: none;
+}
+
 /* ── Size toolbar ───────────────────────────────────── */
 
 .cloudimage-toolbar {
@@ -325,4 +357,228 @@
   background: var(--background-primary);
   color: var(--text-normal);
   font-size: 0.85em;
+}
+
+/* ── Settings: CORS note ─────────────────────────────── */
+
+.cloudimage-cors-note {
+  font-size: 0.8em;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid var(--text-muted);
+  background: var(--background-modifier-hover);
+  border-radius: 4px;
+}
+
+.cloudimage-cors-note p {
+  margin: 0;
+}
+
+/* ── Settings: Account Cards ─────────────────────────── */
+
+.cloudimage-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.cloudimage-account-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+  border: 2px dashed var(--background-modifier-border);
+  border-radius: 8px;
+}
+
+.cloudimage-account-empty p {
+  margin: 0;
+}
+
+.cloudimage-account-card {
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background: var(--background-primary);
+}
+
+.cloudimage-account-card--editing {
+  border-color: var(--interactive-accent);
+}
+
+.cloudimage-account-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.cloudimage-account-header strong {
+  font-size: 1em;
+}
+
+.cloudimage-account-info {
+  font-size: 0.82em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.cloudimage-account-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.cloudimage-account-actions button {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.82em;
+}
+
+/* ── Provider Badges ─────────────────────────────────── */
+
+.cloudimage-provider-badge {
+  display: inline-block;
+  font-size: 0.7em;
+  font-weight: 600;
+  padding: 0.12rem 0.5rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #fff;
+}
+
+.cloudimage-provider-badge--imgbb {
+  background-color: #2196f3;
+}
+
+.cloudimage-provider-badge--r2 {
+  background-color: #f6821f;
+}
+
+.cloudimage-provider-badge--b2 {
+  background-color: #e93434;
+}
+
+/* ── Add Button ──────────────────────────────────────── */
+
+.cloudimage-add-btn {
+  margin-top: 0.75rem;
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.9em;
+}
+
+/* ── Settings Forms ──────────────────────────────────── */
+
+.cloudimage-account-form {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-modifier-hover);
+}
+
+.cloudimage-account-form h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1em;
+}
+
+.cloudimage-provider-picker {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.cloudimage-provider-btn {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.82em;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  cursor: pointer;
+}
+
+.cloudimage-provider-btn--active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.cloudimage-credential-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.cloudimage-form-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cloudimage-form-field label {
+  min-width: 140px;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.cloudimage-form-field input.cloudimage-form-input {
+  flex: 1;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 0.85em;
+}
+
+.cloudimage-form-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cloudimage-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  justify-content: flex-end;
+}
+
+.cloudimage-reveal-btn {
+  padding: 0.15rem 0.35rem;
+  font-size: 0.9em;
+  line-height: 1;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* ── Test Connection Status ──────────────────────────── */
+
+.cloudimage-test-status {
+  font-size: 0.82em;
+  margin-top: 0.4rem;
+  padding: 0.25rem 0;
+}
+
+.cloudimage-test-status--success {
+  color: var(--color-green);
+}
+
+.cloudimage-test-status--fail {
+  color: var(--color-red);
+}
+
+/* ── Delete Confirmation ─────────────────────────────── */
+
+.cloudimage-delete-confirmation {
+  border-color: var(--color-red) !important;
+}
+
+.cloudimage-delete-confirmation p {
+  margin: 0 0 0.5rem;
+  font-size: 0.9em;
 }

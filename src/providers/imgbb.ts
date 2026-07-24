@@ -1,5 +1,5 @@
-import type { ImgBBUploadResult } from "./types";
-import { MAX_FILE_SIZE } from "./types";
+import type { ImageUploadProvider, UploadResult } from "./types";
+import { MAX_FILE_SIZE } from "../types";
 
 const API_URL = "https://api.imgbb.com/1/upload";
 
@@ -13,12 +13,17 @@ export class ImgBBError extends Error {
   }
 }
 
-export class ImgBBClient {
-  static async upload(
+export class ImgBBProvider implements ImageUploadProvider {
+  providerId = "imgbb";
+  displayName = "ImgBB";
+
+  async upload(
     file: File,
-    apiKey: string,
+    credentials: Record<string, string>,
     name?: string,
-  ): Promise<ImgBBUploadResult> {
+  ): Promise<UploadResult> {
+    const apiKey = credentials.imgbbApiKey;
+
     if (file.size > MAX_FILE_SIZE) {
       throw new ImgBBError("File exceeds 32 MB limit", "SIZE_EXCEEDED");
     }
@@ -70,7 +75,9 @@ export class ImgBBClient {
     };
   }
 
-  static async testConnection(apiKey: string): Promise<boolean> {
+  async testConnection(
+    credentials: Record<string, string>,
+  ): Promise<{ ok: boolean; message?: string }> {
     const dot =
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
     const blob = await fetch(`data:image/png;base64,${dot}`).then((r) =>
@@ -79,10 +86,14 @@ export class ImgBBClient {
     const file = new File([blob], "test.png", { type: "image/png" });
 
     try {
-      await ImgBBClient.upload(file, apiKey);
-      return true;
-    } catch {
-      return false;
+      await this.upload(file, credentials);
+      return { ok: true };
+    } catch (error) {
+      const message =
+        error instanceof ImgBBError
+          ? `ImgBB: ${error.message}`
+          : "ImgBB: Connection failed — check your network";
+      return { ok: false, message };
     }
   }
 }

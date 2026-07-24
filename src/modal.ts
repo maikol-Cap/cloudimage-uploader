@@ -1,18 +1,22 @@
 import { App, Modal, Notice } from "obsidian";
-import { ImgBBClient, ImgBBError } from "./api";
 import { EditorService } from "./editor";
 import type CloudImagePlugin from "../main";
-import type { UploadedImage } from "./types";
+import type { UploadedImage, Account } from "./types";
 import {
   SIZE_PRESETS,
   MAX_HISTORY,
   MAX_HISTORY_DISPLAY,
 } from "./types";
+import type { ProviderRegistry } from "./providers/registry";
+import { formatUploadError } from "./providers/types";
+import type { UploadError } from "./providers/types";
+import { compressImage, getCompressionOptions } from "./image-compression";
 
 type InsertMode = "markdown" | "raw";
 
 export class UploadModal extends Modal {
   plugin: CloudImagePlugin;
+  private registry: ProviderRegistry;
 
   // State
   private selectedFile: File | null = null;
@@ -29,6 +33,7 @@ export class UploadModal extends Modal {
   private sizeSelectEl!: HTMLSelectElement;
   private customRowEl!: HTMLElement;
   private customInputEl!: HTMLInputElement;
+  private accountSelectEl!: HTMLSelectElement;
   private urlInputEl!: HTMLInputElement;
   private uploadBtn!: HTMLButtonElement;
   private urlBtn!: HTMLButtonElement;
@@ -36,9 +41,10 @@ export class UploadModal extends Modal {
   private statusEl!: HTMLElement;
   private pasteHandler!: (e: ClipboardEvent) => void;
 
-  constructor(app: App, plugin: CloudImagePlugin) {
+  constructor(app: App, plugin: CloudImagePlugin, registry: ProviderRegistry) {
     super(app);
     this.plugin = plugin;
+    this.registry = registry;
   }
 
   onOpen() {
@@ -48,6 +54,7 @@ export class UploadModal extends Modal {
 
     this.renderTitle(contentEl);
     this.renderSizeControls(contentEl);
+    this.renderAccountSelector(contentEl);
     this.renderDropZone(contentEl);
     this.renderUrlInput(contentEl);
     this.renderPreview(contentEl);
@@ -108,6 +115,42 @@ export class UploadModal extends Modal {
       type: "number",
       cls: "cloudimage-custom-input",
       attr: { min: "50", max: "2000", placeholder: "50\u20132000" },
+    });
+  }
+
+  private renderAccountSelector(container: HTMLElement): void {
+    const { accounts, lastUsedAccountId } = this.plugin.settings;
+
+    // Hidden when 0 or 1 accounts
+    if (accounts.length <= 1) return;
+
+    const row = container.createDiv("cloudimage-account-row");
+    row.createSpan({ text: "Account:" });
+
+    this.accountSelectEl = row.createEl("select", {
+      cls: "cloudimage-account-select",
+    });
+
+    // Sort by name for consistent display
+    const sorted = [...accounts].sort((a, b) => a.name.localeCompare(b.name));
+
+    // Determine default selection before painting (no flicker)
+    const defaultId =
+      lastUsedAccountId && accounts.find((a) => a.id === lastUsedAccountId)
+        ? lastUsedAccountId
+        : sorted[0]?.id;
+
+    for (const account of sorted) {
+      const opt = this.accountSelectEl.createEl("option", {
+        text: `${account.name} [${account.provider.toUpperCase()}]`,
+      });
+      opt.value = account.id;
+      if (account.id === defaultId) opt.selected = true;
+    }
+
+    this.accountSelectEl.addEventListener("change", () => {
+      this.plugin.settings.lastUsedAccountId = this.accountSelectEl.value;
+      this.plugin.saveData(this.plugin.settings);
     });
   }
 
@@ -422,8 +465,39 @@ export class UploadModal extends Modal {
   // ── Core Logic ────────────────────────────────────────────────────────
 
   /**
-   * Common upload flow: validate API key, upload, save history, insert.
-   * Eliminates duplication between handleUpload and handleInsertUrl.
+   * Resolve which account to use for upload.
+   * Prefers lastUsedAccountId, falls back to first account.
+   */
+  private resolveAccount(): Account | null {
+    const { accounts, lastUsedAccountId } = this.plugin.settings;
+    if (accounts.length === 0) return null;
+    if (lastUsedAccountId) {
+      const match = accounts.find((a) => a.id === lastUsedAccountId);
+      if (match) return match;
+    }
+    return accounts[0];
+  }
+
+  /**
+   * Extract credential fields from an Account, excluding metadata.
+   */
+  private extractCredentials(account: Account): Record<string, string> {
+    const fields: Record<string, string> = {};
+    for (const [key, value] of Object.entries(account)) {
+      if (
+        typeof value === "string" &&
+        key !== "id" &&
+        key !== "name" &&
+        key !== "provider"
+      ) {
+        fields[key] = value;
+      }
+    }
+    return fields;
+  }
+
+  /**
+   * Common upload flow: resolve account → provider → upload → save history → insert.
    */
   private async uploadAndInsert(
     file: File,
@@ -431,20 +505,42 @@ export class UploadModal extends Modal {
     mode: InsertMode,
     size?: number,
   ): Promise<void> {
-    const apiKey = this.plugin.settings.apiKey;
-    if (!apiKey) {
-      new Notice("Please configure your ImgBB API key in settings");
+    const account = this.resolveAccount();
+    if (!account) {
+      new Notice("No upload account configured. Add one in plugin settings.");
+      return;
+    }
+
+    const provider = this.registry.get(account.provider);
+    if (!provider) {
+      new Notice(
+        `Upload failed: provider '${account.provider}' is not available.`,
+      );
       return;
     }
 
     this.setLoading(true);
 
     try {
-      const result = await ImgBBClient.upload(file, apiKey, name);
+      // Apply image compression if enabled for this account
+      let uploadFile = file;
+      const compressionOpts = getCompressionOptions(account as unknown as Record<string, any>);
+      if (compressionOpts) {
+        const compressed = await compressImage(file, compressionOpts);
+        if (compressed.wasCompressed) {
+          uploadFile = compressed.file;
+          const originalKB = (compressed.originalSize / 1024).toFixed(0);
+          const compressedKB = (compressed.compressedSize / 1024).toFixed(0);
+          this.statusEl.textContent = `Compressed ${originalKB} → ${compressedKB} KB…`;
+        }
+      }
+
+      const credentials = this.extractCredentials(account);
+      const result = await provider.upload(uploadFile, credentials, name);
 
       this.saveToHistory({
         url: result.url,
-        displayUrl: result.displayUrl,
+        displayUrl: result.displayUrl ?? result.url,
         deleteUrl: result.deleteUrl,
         filename: name,
         uploadedAt: Date.now(),
@@ -452,8 +548,20 @@ export class UploadModal extends Modal {
 
       this.insertUrl(result.url, name, mode, size);
     } catch (error) {
-      if (error instanceof ImgBBError) {
-        new Notice(error.message);
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        "message" in error
+      ) {
+        const uploadErr: UploadError = {
+          code: (error as any).code,
+          providerId:
+            "providerId" in error ? (error as any).providerId : "imgbb",
+          message: (error as any).message,
+          status: "status" in error ? (error as any).status : undefined,
+        };
+        new Notice(formatUploadError(uploadErr));
       } else {
         new Notice("Upload failed: unexpected error");
       }

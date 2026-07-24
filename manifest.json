@@ -1,10 +1,10 @@
 {
   "id": "cloudimage-uploader",
   "name": "CloudImage Uploader",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "minAppVersion": "1.0.0",
-  "description": "Upload images to ImgBB directly from your Obsidian notes. Supports clipboard paste, drag & drop, file picker, image URL insertion, size presets, and upload history.",
-  "author": "",
-  "authorUrl": "",
+  "description": "Upload images to ImgBB, Cloudflare R2, or Backblaze B2. Multiple accounts per provider, image compression, size presets, upload history.",
+  "author": "maikol-Cap",
+  "authorUrl": "https://github.com/maikol-Cap/cloudimage-uploader",
   "isDesktopOnly": false
 }
